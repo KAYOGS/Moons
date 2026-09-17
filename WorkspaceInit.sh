@@ -1,17 +1,47 @@
 #!/usr/bin/env bash
 set -e
 
-DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ ! -f "WorkspaceInit.sh" ] || [ ! -f "main.lua" ]; then
+    echo "========================================================================"
+    echo " 🌙 Inicializando o Moons Framework"
+    echo "========================================================================"
+
+    read -p "📦 Qual o nome do seu novo projeto? " PROJECT_NAME </dev/tty
+
+    if [ -z "$PROJECT_NAME" ]; then
+        echo "❌ Nome inválido. Operação cancelada."
+        exit 1
+    fi
+
+    echo "📥 Baixando a fundação do repositório oficial..."
+    git clone --depth 1 https://github.com/KAYOGS/Moons.git "$PROJECT_NAME"
+
+    cd "$PROJECT_NAME" || exit
+
+    echo "🧹 Desvinculando histórico original e iniciando um novo repositório Git..."
+    rm -rf .git
+    git init
+
+    echo "✅ Projeto '$PROJECT_NAME' estruturado com sucesso!"
+    echo "🚀 Construindo a fundação e ambiente isolado..."
+    echo "------------------------------------------------------------------------"
+fi
+
+if [ -f "${BASH_SOURCE[0]}" ]; then
+    DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+else
+    DIR="$PWD"
+fi
 cd "$DIR"
 
 IMAGE_NAME="lua-pallene:latest"
 
 echo "🔑 Solicitação de acesso de superusuário para o Docker:"
-sudo -v
+sudo -v </dev/tty
 
 echo "🔍 Verificando imagem Docker '$IMAGE_NAME'..."
 
-if ! sudo docker image inspect "$IMAGE_NAME" >/dev/null 2>&1; then
+if ! sudo docker image inspect "$IMAGE_NAME">/dev/null 2>&1; then
     echo "📦 Imagem não encontrada."
     echo "🔨 Baixando dependências e compilando o ambiente (Lua + Pallene)..."
 
@@ -45,6 +75,9 @@ fi
 
 echo "🚀 Entrando no container..."
 echo ""
+if [ ! -t 0 ]; then
+    exec < /dev/tty
+fi
 
 sudo docker run -it --rm -v "$DIR:/app" "$IMAGE_NAME" bash -c "
 cat << 'BANNER'
