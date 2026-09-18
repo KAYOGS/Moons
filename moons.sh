@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-if [ ! -f "WorkspaceInit.sh" ] || [ ! -f "main.lua" ]; then
+if [ ! -f "main.lua" ]; then
     echo "========================================================================"
     echo " 🌙 Inicializando o Moons Framework"
     echo "========================================================================"
@@ -27,12 +27,7 @@ if [ ! -f "WorkspaceInit.sh" ] || [ ! -f "main.lua" ]; then
     echo "------------------------------------------------------------------------"
 fi
 
-if [ -f "${BASH_SOURCE[0]}" ]; then
-    DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-else
-    DIR="$PWD"
-fi
-cd "$DIR"
+DIR="$PWD"
 
 IMAGE_NAME="lua-pallene:latest"
 
