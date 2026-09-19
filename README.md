@@ -1,6 +1,10 @@
+<p align="center">
+  <img src="MoonsIcon.png" alt="Moons Framework Logo" width="85" style="vertical-align: middle; margin-right: 15px;" />
+  <b style="font-size: 46px; vertical-align: middle; color: #ffffff;">Moons Framework</b>
+</p>
+
 <div align="center">
-  <h1><img src="MoonsIcon.png" alt="Moons Framework Logo" width="70px" /> Moons Framework</h1>
-  <p><b>Simple as a script. Fast as a binary.</b></p>
+  <p style="font-size: 20px; margin-top: 15px;"><b>Simple as a script. Fast as a binary.</b></p>
 </div>
 
 ---
@@ -58,7 +62,15 @@ Você não precisa ter *nada* configurado na sua máquina. Se você não tem o G
 Abra seu terminal e execute:
 
 ```bash
-curl -fsSL https://githubusercontent.com | bash
+curl -fsSL https://github.com/KAYOGS/Moons.git | bash
+```
+
+### 🪟 Windows (PowerShell)
+
+Abra o PowerShell como Administrador e execute:
+
+```powershell
+irm https://github.com/KAYOGS/Moons.git | iex
 ```
 
 ---
@@ -106,5 +118,5 @@ O Moons Framework só é possível graças ao trabalho revolucionário de pesqui
 
 Um agradecimento especial à equipe do **LabLua** e do **Departamento de Informática da PUC-Rio** pelo desenvolvimento incrível da linguagem Lua e da linguagem Pallene.
 
-* 🔗 [Repositório Oficial do Pallene (GitHub)](https://github.com/pallene-lang/pallene.git)
+* 🔗 [Repositório Oficial do Pallene (GitHub)](https://github.com)
 * 🔗 [Site Oficial do Lua](https://lua.org)
