@@ -1,83 +1,79 @@
-#!/usr/bin/env bash
-set -e
+# install.ps1
+$ErrorActionPreference = "Stop"
 
-echo "🌙 Instalando Moons Framework..." #
+Write-Host "🌙 Instalando Moons Framework..." -ForegroundColor Cyan
 
-# 1. Identificação do Usuário Real (mesmo se o script rodar via sudo curl | bash)
-REAL_USER=${SUDO_USER:-$USER}
-USER_HOME=$(eval echo ~$REAL_USER)
+# 1. Verificação de Privilégios (UAC)
+$isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+if (-Not $isAdmin) {
+    Write-Host "❌ Este instalador precisa configurar o Docker e variáveis de sistema." -ForegroundColor Red
+    Write-Host "👉 Por favor, feche este terminal, abra o PowerShell como Administrador e execute a instalação novamente." -ForegroundColor Yellow
+    exit 1
+}
 
-SUDO=""
-if command -v sudo >/dev/null 2>&1; then
-    SUDO="sudo" #
-fi
+Write-Host "📦 Preparando infraestrutura base..."
 
-# 2. Verificação de Compatibilidade (Debian/Ubuntu)
-if [ -f /etc/os-release ]; then
-    . /etc/os-release
-    if [[ "$ID" != "ubuntu" && "$ID" != "debian" && "$ID_LIKE" != *"ubuntu"* && "$ID_LIKE" != *"debian"* ]]; then
-        echo "❌ SO não suportado. Este instalador foi otimizado para Debian/Ubuntu e derivados."
-        exit 1
-    fi
-fi
+$requiresReboot =$false
 
-echo "📦 Preparando infraestrutura base..."
-$SUDO apt-get update -qq
+# 2. Instalação Silenciosa do Git via Winget
+if (-Not (Get-Command "git" -ErrorAction SilentlyContinue)) {
+    Write-Host "📥 Instalando Git..."
+    winget install --id Git.Git -e --source winget --silent --accept-source-agreements --accept-package-agreements | Out-Null
+    Write-Host "✅ Git instalado." -ForegroundColor Green
+} else {
+    Write-Host "✅ Git já detectado."
+}
 
-# 3. Instalação Silenciosa de Dependências
-command -v curl >/dev/null 2>&1 || $SUDO apt-get install -y -qq curl >/dev/null
-command -v git >/dev/null 2>&1 || $SUDO apt-get install -y -qq git >/dev/null
+# 3. Instalação Silenciosa do Docker Desktop via Winget
+if (-Not (Get-Command "docker" -ErrorAction SilentlyContinue)) {
+    Write-Host "🐳 Instalando Motor Docker Desktop (Isso pode levar alguns minutos)..."
+    winget install --id Docker.DockerDesktop -e --source winget --silent --accept-source-agreements --accept-package-agreements | Out-Null
+    Write-Host "✅ Docker Desktop instalado." -ForegroundColor Green
+    $requiresReboot =$true
+} else {
+    Write-Host "✅ Docker já detectado."
+}
 
-# 4. Instalação do Docker Oficial (Zero Intervenção)
-if ! command -v docker >/dev/null 2>&1; then
-    echo "🐳 Instalando Motor Docker Oficial..."
-    $SUDO apt-get install -y -qq ca-certificates gnupg >/dev/null
-    $SUDO install -m 0755 -d /etc/apt/keyrings
+# 4. Configuração do Diretório Oculto e Core do Framework
+Write-Host "📥 Configurando o ambiente de execução..."
+$moonsDir = "$env:USERPROFILE\.moons"
+$binDir = "$moonsDir\bin"
 
-    # Injeta a chave GPG oficial do Docker
-    curl -fsSL https://download.docker.com/linux/$ID/gpg | $SUDO gpg --dearmor -yes -o /etc/apt/keyrings/docker.gpg
-    $SUDO chmod a+r /etc/apt/keyrings/docker.gpg
+if (-Not (Test-Path $binDir)) { New-Item -ItemType Directory -Force -Path$binDir | Out-Null }
 
-    # Adiciona o repositório na source list
-    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/$ID $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | $SUDO tee /etc/apt/sources.list.d/docker.list >/dev/null
+$corePath = "$moonsDir\core.ps1"
+$repoUrl = "https://raw.githubusercontent.com/KAYOGS/Moons/main/moons.ps1"
 
-    $SUDO apt-get update -qq
-    $SUDO apt-get install -y -qq docker-ce docker-ce-cli containerd.io docker-buildx-plugin >/dev/null
-else
-    echo "✅ Docker já detectado."
-fi
+try {
+    Invoke-WebRequest -Uri $repoUrl -OutFile$corePath -UseBasicParsing
+} catch {
+    Write-Host "❌ Erro ao baixar o núcleo do Moons. Verifique a URL do repositório." -ForegroundColor Red
+    exit 1
+}
 
-# 5. Configuração do Grupo Docker
-if ! getent group docker > /dev/null; then
-    $SUDO groupadd docker
-fi
-$SUDO usermod -aG docker "$REAL_USER"
-$SUDO systemctl enable --now docker >/dev/null 2>&1 || true
+# 5. O Smart Wrapper (Arquivo .cmd)
+# Isso permite rodar o Moons em qualquer terminal (CMD, PowerShell, Git Bash) sem erro de ExecutionPolicy
+$cmdPath = "$binDir\moons.cmd"
+$cmdContent = "@echo off`r`nPowerShell.exe -NoProfile -ExecutionPolicy Bypass -File `"%USERPROFILE%\.moons\core.ps1`" %*"
+Set-Content -Path $cmdPath -Value$cmdContent -Encoding ASCII
 
-# 6. Orquestração do CLI e Bypass de Reboot
-echo "📥 Configurando o ambiente de execução..."
+# 6. Injeção no PATH do Sistema
+$machinePath = [Environment]::GetEnvironmentVariable("PATH", "Machine")
+if ($machinePath -notlike "*$binDir*") {
+    $newPath = "$machinePath;$binDir"
+    [Environment]::SetEnvironmentVariable("PATH", $newPath, "Machine")
+    $env:PATH = "$env:PATH;$binDir" # Injeta na sessão atual para uso imediato
+}
 
-# Isola o script real em uma pasta oculta no perfil do dev
-$SUDO -u "$REAL_USER" mkdir -p "$USER_HOME/.moons"
-curl -fsSL https://raw.githubusercontent.com/KAYOGS/Moons/main/moons.sh -o "$USER_HOME/.moons/core.sh"
-$SUDO chmod +x "$USER_HOME/.moons/core.sh"
-
-# O Pulo do Gato: Transforma o /usr/local/bin/moons em um Smart Wrapper
-$SUDO mkdir -p /usr/local/bin #[cite: 5]
-
-$SUDO tee /usr/local/bin/moons > /dev/null << EOF
-#!/usr/bin/env bash
-
-# Checa se o usuário atual tem acesso nativo ao daemon do Docker
-if ! docker ps >/dev/null 2>&1; then
-    # Se falhar, burla o logout aplicando o grupo 'docker' dinamicamente na sub-sessão
-    exec sg docker -c "$USER_HOME/.moons/core.sh \$*"
-else
-    # Sessão já autenticada
-    exec $USER_HOME/.moons/core.sh "\$@"
-fi
-EOF
-
-$SUDO chmod +x /usr/local/bin/moons #[cite: 5]
-
-echo "✅ Instalação concluída! Abra um novo terminal ou apenas digite 'moons' em qualquer lugar para começar." #[cite: 5]
+# 7. Finalização e Tratamento do Reboot
+Write-Host "========================================================================" -ForegroundColor Cyan
+if ($requiresReboot) {
+    Write-Host "✅ Instalação base concluída, MAS o Windows precisa ser reiniciado." -ForegroundColor Yellow
+    Write-Host "O Docker Desktop requer que o WSL2/Hyper-V seja ativado na inicialização do sistema."
+    Write-Host "👉 Por favor, reinicie seu computador manualmente."
+    Write-Host "👉 Após reiniciar, abra um terminal, vá até sua pasta de projetos e digite 'moons'."
+} else {
+    Write-Host "✅ Instalação concluída com sucesso!" -ForegroundColor Green
+    Write-Host "👉 Abra um novo terminal em sua pasta de projetos e digite 'moons' para começar."
+}
+Write-Host "========================================================================" -ForegroundColor Cyan
