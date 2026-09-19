@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="MoonsIcon.png" alt="Moons Framework Logo" width="85" style="vertical-align: middle; margin-right: 15px;" />
+  <img src="MoonsIcon.png" alt="Moons Framework Logo" width="60"/>
   <b style="font-size: 46px; vertical-align: middle; color: #ffffff;">Moons Framework</b>
 </p>
 
