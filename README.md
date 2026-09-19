@@ -1,6 +1,6 @@
 <p align="center">
   <img src="MoonsIcon.png" alt="Moons Framework Logo" width="60"/>
-  <b style="font-size: 46px; vertical-align: middle; color: #ffffff;">Moons Framework</b>
+  <b style="font-size: 56px; vertical-align: middle; color: #ffffff;">Moons Framework</b>
 </p>
 
 <div align="center">
