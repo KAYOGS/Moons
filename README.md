@@ -1,5 +1,5 @@
 <div align="center">
-  <h1><img src="MoonsIcon.png" alt="Moons Framework Logo" width="40px" /> Moons Framework</h1>
+  <h1><img src="MoonsIcon.png" alt="Moons Framework Logo" width="60px" /> Moons Framework</h1>
   <p><b>Simple as a script. Fast as a binary.</b></p>
 </div>
 
