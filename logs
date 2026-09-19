@@ -1,0 +1,17 @@
+kayo@debian:~/Downloads$ ./install.sh
+🌙 Instalando Moons Framework...
+📦 Preparando infraestrutura base...
+[sudo] senha para kayo: 
+🐳 Instalando Motor Docker Oficial...
+gpg: invalid option "-yes"
+
+# 4. Instalação do Docker Oficial (Zero Intervenção)
+if ! command -v docker >/dev/null 2>&1; then
+    echo "🐳 Instalando Motor Docker Oficial..."
+    $SUDO apt-get install -y -qq ca-certificates gnupg >/dev/null
+    $SUDO install -m 0755 -d /etc/apt/keyrings
+
+    # Injeta a chave GPG oficial do Docker
+    curl -fsSL https://download.docker.com/linux/$ID/gpg | $SUDO gpg --dearmor -yes -o /etc/apt/keyrings/docker.gpg
+
+Adicionar um - no --yes da linha curl
