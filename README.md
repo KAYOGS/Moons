@@ -62,7 +62,7 @@ Você não precisa ter *nada* configurado na sua máquina. Se você não tem o G
 Abra seu terminal e execute:
 
 ```bash
-curl -fsSL https://github.com/KAYOGS/Moons.git | bash
+curl -fsSL https://raw.githubusercontent.com/KAYOGS/Moons/main/install.sh | bash
 ```
 
 ### 🪟 Windows (PowerShell)
