@@ -70,7 +70,7 @@ curl -fsSL https://raw.githubusercontent.com/KAYOGS/Moons/main/install.sh | bash
 Abra o PowerShell como Administrador e execute:
 
 ```powershell
-irm https://github.com/KAYOGS/Moons.git | iex
+irm https://raw.githubusercontent.com/KAYOGS/Moons/main/install.ps1 | iex
 ```
 
 ---
