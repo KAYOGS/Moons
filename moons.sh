@@ -131,6 +131,9 @@ if [ "$COMMAND" == "create" ] || [ "$COMMAND" == "new" ]; then
 
     cd "$PROJECT_NAME" || exit
 
+    echo "🧹 Limpando arquivos internos de instalação do framework..."
+    rm -f install.sh install.ps1 moons.sh moons.ps1 MoonsIcon.png
+
     echo "🧹 Desvinculando histórico original e iniciando um novo repositório Git..."
     rm -rf .git
     git init

@@ -127,6 +127,9 @@ if ($COMMAND -eq "create" -or $COMMAND -eq "new") {
 
     Set-Location -Path $PROJECT_NAME
 
+    Write-Host "🧹 Limpando arquivos internos de instalação do framework..."
+    Remove-Item -Force "install.sh", "install.ps1", "moons.sh", "moons.ps1", "MoonsIcon.png" -ErrorAction SilentlyContinue
+
     Write-Host "🧹 Desvinculando histórico original e iniciando um novo repositório Git..."
     Remove-Item -Recurse -Force ".git" -ErrorAction SilentlyContinue
     git init
