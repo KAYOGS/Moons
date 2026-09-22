@@ -29,7 +29,7 @@ O Moons foi desenhado com dois propósitos fundamentais:
 
 ---
 
-## 🏗️ Por que Lua 5.4+ e Pallene? (A Arquitetura)
+## 🏗️ Por que Lua 5.5+ e Pallene? (A Arquitetura)
 
 O ecossistema do Moons é construído sobre a união de **Lua** (scripts simples e dinâmicos) e **Pallene** (tipagem estática e compilação *Ahead-of-Time*).
 
